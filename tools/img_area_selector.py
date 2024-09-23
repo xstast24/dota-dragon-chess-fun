@@ -13,7 +13,7 @@ class ImageAreaSelector:
         self.end_point = None
         self.zoomed = False
         self.zoom_factor = 1.0
-        self.zoom_offset = (0, 0)
+        self.zoom_center = None
         self.rmb_first_point = None
         self.selected_rectangle = None
 
@@ -47,16 +47,15 @@ class ImageAreaSelector:
                 self.end_point = None
         elif event == cv2.EVENT_MOUSEWHEEL:
             if flags > 0:
-                self.zoom_in(image_x, image_y)
+                self.zoom_in(x, y)
             else:
-                self.zoom_out(image_x, image_y)
+                self.zoom_out(x, y)
 
     def screen_to_image_coords(self, x: int, y: int) -> Tuple[int, int]:
-        if self.zoomed:
-            image_x = int(self.zoom_offset[0] + x / self.zoom_factor)
-            image_y = int(self.zoom_offset[1] + y / self.zoom_factor)
-        else:
-            image_x, image_y = x, y
+        if self.zoom_center is None:
+            return x, y
+        image_x = int(self.zoom_center[0] + (x - self.image.shape[1] / 2) / self.zoom_factor)
+        image_y = int(self.zoom_center[1] + (y - self.image.shape[0] / 2) / self.zoom_factor)
         return image_x, image_y
 
     def zoom_in(self, x: int, y: int) -> None:
@@ -69,23 +68,29 @@ class ImageAreaSelector:
         if self.zoom_factor < 1.0:
             self.zoom_factor = 1.0
             self.zoomed = False
+            self.zoom_center = None
         self.update_zoomed_image(x, y)
 
     def update_zoomed_image(self, x: int, y: int) -> None:
-        if self.zoomed:
-            height, width = self.original_image.shape[:2]
-            center_x, center_y = x, y
-            
-            left = max(0, int(center_x - width / (2 * self.zoom_factor)))
-            top = max(0, int(center_y - height / (2 * self.zoom_factor)))
-            right = min(width, int(center_x + width / (2 * self.zoom_factor)))
-            bottom = min(height, int(center_y + height / (2 * self.zoom_factor)))
-            
-            self.zoom_offset = (left, top)
-            self.image = cv2.resize(self.original_image[top:bottom, left:right], (width, height))
-        else:
-            self.image = self.original_image.copy()
-            self.zoom_offset = (0, 0)
+        height, width = self.original_image.shape[:2]
+        
+        if self.zoom_center is None:
+            self.zoom_center = (width // 2, height // 2)
+        
+        mouse_x, mouse_y = self.screen_to_image_coords(x, y)
+        
+        new_width = int(width / self.zoom_factor)
+        new_height = int(height / self.zoom_factor)
+        
+        left = max(0, int(mouse_x - new_width / 2))
+        top = max(0, int(mouse_y - new_height / 2))
+        right = min(width, left + new_width)
+        bottom = min(height, top + new_height)
+        
+        self.zoom_center = ((left + right) // 2, (top + bottom) // 2)
+        
+        cropped = self.original_image[top:bottom, left:right]
+        self.image = cv2.resize(cropped, (width, height), interpolation=cv2.INTER_LINEAR)
 
     def print_rectangle_info(self) -> None:
         if self.start_point and self.end_point:
@@ -110,32 +115,26 @@ class ImageAreaSelector:
             
             if self.start_point:
                 start_x, start_y = self.start_point
-                cv2.circle(display_image, (int((start_x - self.zoom_offset[0]) * self.zoom_factor),
-                                           int((start_y - self.zoom_offset[1]) * self.zoom_factor)), 3, (0, 255, 0), -1)
+                cv2.circle(display_image, (int(start_x), int(start_y)), 3, (0, 255, 0), -1)
             
             if self.start_point and self.end_point:
                 start_x, start_y = self.start_point
                 end_x, end_y = self.end_point
                 cv2.rectangle(display_image, 
-                              (int((start_x - self.zoom_offset[0]) * self.zoom_factor),
-                               int((start_y - self.zoom_offset[1]) * self.zoom_factor)),
-                              (int((end_x - self.zoom_offset[0]) * self.zoom_factor),
-                               int((end_y - self.zoom_offset[1]) * self.zoom_factor)),
+                              (int(start_x), int(start_y)),
+                              (int(end_x), int(end_y)),
                               (0, 255, 0), 2)
 
             if self.rmb_first_point:
                 rmb_x, rmb_y = self.rmb_first_point
-                cv2.circle(display_image, (int((rmb_x - self.zoom_offset[0]) * self.zoom_factor),
-                                           int((rmb_y - self.zoom_offset[1]) * self.zoom_factor)), 3, (0, 0, 255), -1)
+                cv2.circle(display_image, (int(rmb_x), int(rmb_y)), 3, (0, 0, 255), -1)
 
             if self.selected_rectangle:
                 start_x, start_y = self.selected_rectangle[0]
                 end_x, end_y = self.selected_rectangle[1]
                 cv2.rectangle(display_image,
-                              (int((start_x - self.zoom_offset[0]) * self.zoom_factor),
-                               int((start_y - self.zoom_offset[1]) * self.zoom_factor)),
-                              (int((end_x - self.zoom_offset[0]) * self.zoom_factor),
-                               int((end_y - self.zoom_offset[1]) * self.zoom_factor)),
+                              (int(start_x), int(start_y)),
+                              (int(end_x), int(end_y)),
                               (0, 255, 0), 2)
 
             mouse_pos = pyautogui.position()
