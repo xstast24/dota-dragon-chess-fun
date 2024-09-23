@@ -22,6 +22,17 @@ class ImageAreaSelector:
             return cv2.imread(image_path)
         return np.array(pyautogui.screenshot())
 
+    def take_new_screenshot(self) -> None:
+        self.image = np.array(pyautogui.screenshot())
+        self.original_image = self.image.copy()
+        self.zoomed = False
+        self.zoom_factor = 1.0
+        self.zoom_center = None
+        self.start_point = None
+        self.end_point = None
+        self.rmb_first_point = None
+        self.selected_rectangle = None
+
     def mouse_callback(self, event: int, x: int, y: int, flags: int, param: None) -> None:
         image_x, image_y = self.screen_to_image_coords(x, y)
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -108,6 +119,7 @@ class ImageAreaSelector:
         print("- Left Mouse Button: Click and drag to select rectangle area")
         print("- Right Mouse Button: Click once to set point1, click again to set point2 of rectangle area")
         print("- Mouse Wheel: Zoom in/out")
+        print("- N (or n): Take a new screenshot")
         print("- ESC: Exit")
 
         while True:
@@ -151,6 +163,8 @@ class ImageAreaSelector:
             key = cv2.waitKey(1) & 0xFF
             if key == 27:  # ESC key
                 break
+            elif key in [ord('n'), ord('N')]:
+                self.take_new_screenshot()
 
         cv2.destroyAllWindows()
 
