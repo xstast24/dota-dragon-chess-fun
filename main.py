@@ -31,7 +31,7 @@ from colors import Color, ColorRange
 # Constants
 HOTKEY_START = 'f7'
 HOTKEY_STOP = 'f8'
-SCREENSHOT_INTERVAL = 1000  # milliseconds
+SCREENSHOT_INTERVAL = 100  # milliseconds
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
 BOARD_SIZE = (8, 8)
 
