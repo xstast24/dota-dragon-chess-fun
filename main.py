@@ -17,6 +17,7 @@
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
 from enum import Enum
 import pyautogui
+import mss
 import cv2
 import numpy as np
 from PIL import Image
@@ -66,9 +67,15 @@ class GemColor(Enum):
     pink_special = 11
 
 
-def capture_screenshot():
-    print("Capturing screenshot...")
-    return pyautogui.screenshot(region=BOARD_REGION)
+def capture_screenshot() -> np.ndarray:
+    """Return a screenshot of the board as a numpy array, colors in BGR order (can be indexed like: pixel = array[height][width])"""
+    # FIXME tmp debug helper - load from file img/screenshot1080p.png
+    return cv2.imread('img/screenshot1080p.png')  # BGR order
+
+    with mss.mss() as sct:
+        region = {'top': BOARD_REGION[1], 'left': BOARD_REGION[0], 'width': BOARD_REGION[2], 'height': BOARD_REGION[3]}
+        screenshot = sct.grab(region)  # ScreenShot object
+        return np.array(screenshot)  # BGR order
 
 def parse_screenshot(screenshot):
     """Parse the screenshot to get the board state."""
@@ -85,7 +92,7 @@ def main_loop():
     while True:
         screenshot = capture_screenshot()
         cv2.imshow('screenshot', np.array(screenshot))
-        # cv2.waitKey()
+        cv2.waitKey()
         board_state = parse_screenshot(screenshot)
         board.update(board_state)
         
