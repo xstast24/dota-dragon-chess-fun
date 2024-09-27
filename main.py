@@ -15,7 +15,7 @@
 # 6. A way to allow the player to make a move (swap two neighboring gems) by simulating the mouse move - we need a way of mouse simulating that works in Dota 2
 # 7. A method that runs the screenshot capture, parsing, move detection, and move execution in time intervals of T milliseconds
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
-from enum import Enum
+from enum import StrEnum
 import pyautogui
 import mss
 import cv2
@@ -34,54 +34,85 @@ HOTKEY_START = 'f7'
 HOTKEY_STOP = 'f8'
 SCREENSHOT_INTERVAL = 100  # milliseconds
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
-BOARD_SIZE = (8, 8)
+BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
 
+GEM_SIZE = (BOARD_REGION[2] // BOARD_SIZE[0], BOARD_REGION[3] // BOARD_SIZE[1])  # width, height
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
 
-class GemColorRange:  # TODO manually define color ranges so they fit the in-game colors
-    red = ColorRange(Color(255, 0, 0), Color(255, 50, 50))
-    red_special = ColorRange(Color(255, 0, 0), Color(255, 50, 50))
-    dark_red = ColorRange(Color(255, 0, 0), Color(255, 50, 50))
-    dark_red_special = ColorRange(Color(255, 0, 0), Color(255, 50, 50))
-    blue = ColorRange(Color(0, 0, 255), Color(50, 50, 255))
-    blue_special = ColorRange(Color(0, 0, 255), Color(50, 50, 255))
-    turquoise = ColorRange(Color(0, 255, 255), Color(50, 255, 255))
-    turquoise_special = ColorRange(Color(0, 255, 255), Color(50, 255, 255))
-    yellow = ColorRange(Color(255, 255, 0), Color(255, 255, 50))
-    yellow_special = ColorRange(Color(255, 255, 0), Color(255, 255, 50))
-    pink = ColorRange(Color(255, 105, 180), Color(255, 150, 230))
-    pink_special = ColorRange(Color(255, 105, 180), Color(255, 150, 230))
+class GemColor(StrEnum):
+    red = 'red'
+    red_special = 'red_special'
+    dark_red = 'dark_red'
+    dark_red_special = 'dark_red_special'
+    blue = 'blue'
+    blue_special = 'blue_special'
+    turquoise = 'turquoise'
+    turquoise_special = 'turquoise_special'
+    yellow = 'yellow'
+    yellow_special = 'yellow_special'
+    pink = 'pink'
+    pink_special = 'pink_special'
 
-class GemColor(Enum):
-    red = 0
-    red_special = 1
-    dark_red = 2
-    dark_red_special = 3
-    blue = 4
-    blue_special = 5
-    turquoise = 6
-    turquoise_special = 7
-    yellow = 8
-    yellow_special = 9
-    pink = 10
-    pink_special = 11
+GemColorRange = {
+    GemColor.red: ColorRange(Color(170, 60, 40), Color(195, 90, 60)),
+    GemColor.red_special: ColorRange(Color(255, 0, 0), Color(255, 50, 50)),
+    GemColor.dark_red: ColorRange(Color(60, 20, 25), Color(80, 30, 35)),
+    GemColor.dark_red_special: ColorRange(Color(255, 0, 0), Color(255, 50, 50)),
+    GemColor.blue: ColorRange(Color(70, 80, 150), Color(80, 95, 165)),
+    GemColor.blue_special: ColorRange(Color(0, 0, 255), Color(50, 50, 255)),
+    GemColor.turquoise: ColorRange(Color(60, 140, 150), Color(75, 160, 165)),
+    GemColor.turquoise_special: ColorRange(Color(0, 255, 255), Color(50, 255, 255)),
+    GemColor.yellow: ColorRange(Color(190, 145, 110), Color(215, 170, 120)),
+    GemColor.yellow_special: ColorRange(Color(255, 255, 0), Color(255, 255, 50)),
+    GemColor.pink: ColorRange(Color(160, 85, 170), Color(180, 110, 190)),
+    GemColor.pink_special: ColorRange(Color(255, 105, 180), Color(255, 150, 230))
+}
 
-
-def capture_screenshot() -> np.ndarray:
+def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in BGR order (can be indexed like: pixel = array[height][width])"""
-    # FIXME tmp debug helper - load from file img/screenshot1080p.png
-    return cv2.imread('img/screenshot1080p.png')  # BGR order
+    # FIXME tmp debug helper - remove lat
+    full_screenshot = cv2.imread('img/screenshot1080p.png')  # BGR order
+    return full_screenshot[BOARD_REGION[1]:BOARD_REGION[1]+BOARD_REGION[3], BOARD_REGION[0]:BOARD_REGION[0]+BOARD_REGION[2]]
 
     with mss.mss() as sct:
         region = {'top': BOARD_REGION[1], 'left': BOARD_REGION[0], 'width': BOARD_REGION[2], 'height': BOARD_REGION[3]}
         screenshot = sct.grab(region)  # ScreenShot object
         return np.array(screenshot)  # BGR order
 
-def parse_screenshot(screenshot):
+def parse_board_screenshot(screenshot) -> np.ndarray:
     """Parse the screenshot to get the board state."""
-    # TODO: Implement image processing to detect gems and their colors
-    # This is a placeholder implementation
-    return np.random.randint(0, 5, BOARD_SIZE)
+    # count average color of each gem, but consider only inner area of each gem (exclude 20% of pixels from each side)
+    board_state = np.zeros(BOARD_SIZE, dtype=str)
+    gem_width, gem_height = GEM_SIZE
+    inner_margin = 0.2  # 20% margin from each side
+
+    for row in range(BOARD_SIZE[0]):
+        for col in range(BOARD_SIZE[1]):
+            print(f'Row: {row}, Col: {col}')
+            x_start = int(col * gem_width + gem_width * inner_margin)
+            x_end = int((col + 1) * gem_width - gem_width * inner_margin)
+            y_start = int(row * gem_height + gem_height * inner_margin)
+            y_end = int((row + 1) * gem_height - gem_height * inner_margin)
+
+            gem_area = screenshot[y_start:y_end, x_start:x_end]
+            average_color = np.mean(gem_area, axis=(0, 1))  # BGR order
+            average_color_rgb = Color(*average_color[::-1])  # Convert BGR to RGB
+
+            # Match the average color to a GemColor
+            for gem_color in GemColor:
+                color_range = GemColorRange[gem_color]
+                if color_range.contains(average_color_rgb):
+                    board_state[row, col] = gem_color.value
+                    break
+            else:
+                print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
+                board_state[row, col] = ''
+                # TODO debug helper - remove later
+                cv2.imshow('unknown', gem_area)
+                cv2.waitKey()
+
+    return board_state
+    
 
 def main_loop():
     board = Board(BOARD_SIZE)
@@ -90,10 +121,10 @@ def main_loop():
     sleep_time = SCREENSHOT_INTERVAL / 1000  # seconds
     print("Starting main loop...")
     while True:
-        screenshot = capture_screenshot()
+        screenshot = capture_board_screenshot()
         cv2.imshow('screenshot', np.array(screenshot))
         cv2.waitKey()
-        board_state = parse_screenshot(screenshot)
+        board_state = parse_board_screenshot(screenshot)
         board.update(board_state)
         
         best_move = move_detector.find_best_move(board)
