@@ -62,6 +62,11 @@ class ColorRange:
                self.min_rgb.green <= color.green <= self.max_rgb.green and \
                self.min_rgb.blue <= color.blue <= self.max_rgb.blue
 
+    def has_intersection(self, other: ColorRange) -> bool:
+        return self.min_rgb.red <= other.max_rgb.red and self.max_rgb.red >= other.min_rgb.red and \
+               self.min_rgb.green <= other.max_rgb.green and self.max_rgb.green >= other.min_rgb.green and \
+               self.min_rgb.blue <= other.max_rgb.blue and self.max_rgb.blue >= other.min_rgb.blue
+
     def __str__(self) -> str:
         return f"ColorRange(min_rgb={self.min_rgb}, max_rgb={self.max_rgb})"
     
