@@ -50,12 +50,12 @@ def main_loop():
     print("Starting main loop...")
     while True:
         screenshot = capture_board_screenshot()
-        cv2.imshow('screenshot', np.array(screenshot))
-        cv2.waitKey()
-        board_state = parse_board_screenshot(screenshot)
-        # TODO continue here tomorrow
-        board.update(board_state)
-        
+        if DEBUG_MODE:
+            print("Captured new screenshot, showing it...")
+            cv2.imshow('screenshot', np.array(screenshot))
+            cv2.waitKey()
+        board.update_from_screenshot(screenshot)
+
         best_move = move_detector.find_best_move(board)
         if best_move:
             move_executor.execute_move(best_move)

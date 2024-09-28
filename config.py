@@ -4,7 +4,7 @@ from enum import StrEnum
 from colors import Color, ColorRange
 
 
-DEBUG = True  # if enabled, some debug info will be printed, some images displayed (e.g. if a screenshot is captured), etc.
+DEBUG_MODE = True  # if enabled, some debug info will be printed, some images displayed (e.g. if a screenshot is captured), etc.
 
 HOTKEY_START = 'f7'
 HOTKEY_STOP = 'f8'

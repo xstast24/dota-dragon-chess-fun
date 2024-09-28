@@ -43,7 +43,7 @@ class Board:
                 else:
                     print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
                     board_state[row, col] = ''
-                    if DEBUG:
+                    if DEBUG_MODE:
                         cv2.imshow('unknown', gem_area)
                         cv2.waitKey()
 
