@@ -34,7 +34,13 @@ class Board:
         self.grid = new_state
 
     def update_from_screenshot(self, board_screenshot: np.ndarray) -> None:
-        """Update the board from a screenshot of the board area."""
+        """
+        Update the board from a screenshot of the board area.
+        
+        Args:
+            board_screenshot (np.ndarray): A numpy array representing the screenshot of the board area.
+                                           The color order is expected to be RGB.
+        """
         print(f'Updating board from screenshot...')
         board_state = np.empty(self.size, dtype=object)
         gem_width, gem_height = GEM_SIZE
@@ -48,20 +54,20 @@ class Board:
                 y_end = int((row + 1) * gem_height - gem_height * inner_margin)
 
                 gem_area = board_screenshot[y_start:y_end, x_start:x_end]
-                average_color = np.mean(gem_area, axis=(0, 1))  # BGR order
-                average_color_rgb = Color(*average_color[::-1])  # Convert BGR to RGB
+                average_color = np.mean(gem_area, axis=(0, 1))  # RGB order
+                average_color = Color(*average_color)
 
                 # Match the average color to a GemColor
                 for gem_color in GemColor:
                     color_range = GemColorRanges[gem_color]
-                    if color_range.contains(average_color_rgb):
+                    if color_range.contains(average_color):
                         board_state[row, col] = Gem(gem_color, (row, col))
                         break
                 else:
-                    print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
+                    print(f"Warning: Unrecognized color {average_color} at position ({row}, {col})")
                     board_state[row, col] = None
                     if DEBUG_MODE:
-                        cv2.imshow('unknown', gem_area)
+                        cv2.imshow('unknown', cv2.cvtColor(gem_area, cv2.COLOR_RGB2BGR))
                         cv2.waitKey()
 
         self.grid = board_state

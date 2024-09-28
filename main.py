@@ -16,31 +16,31 @@
 # 7. A method that runs the screenshot capture, parsing, move detection, and move execution in time intervals of T milliseconds
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
 from enum import StrEnum
-import pyautogui
 import mss
 import cv2
+import mss.screenshot
 import numpy as np
-from PIL import Image
 import keyboard
 import time
 from board import Board
 from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
-from colors import Color, ColorRange
 from config import *
 
 
 def capture_board_screenshot() -> np.ndarray:
-    """Return a screenshot of the board as a numpy array, colors in BGR order (can be indexed like: pixel = array[height][width])"""
-    # FIXME tmp debug helper - remove lat
-    full_screenshot = cv2.imread('img/screenshot1080p.png')  # BGR order
-    return full_screenshot[BOARD_REGION[1]:BOARD_REGION[1]+BOARD_REGION[3], BOARD_REGION[0]:BOARD_REGION[0]+BOARD_REGION[2]]
+    """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
+    # debug help - load img from file - uncomment if needed
+    # full_screenshot = cv2.imread('img/screenshot1080p.png')  # BGR order
+    # full_screenshot = cv2.cvtColor(full_screenshot, cv2.COLOR_BGR2RGB)
+    # return full_screenshot[BOARD_REGION[1]:BOARD_REGION[1]+BOARD_REGION[3], BOARD_REGION[0]:BOARD_REGION[0]+BOARD_REGION[2]]
 
     with mss.mss() as sct:
         region = {'top': BOARD_REGION[1], 'left': BOARD_REGION[0], 'width': BOARD_REGION[2], 'height': BOARD_REGION[3]}
-        screenshot = sct.grab(region)  # ScreenShot object
-        return np.array(screenshot)  # BGR order
-
+        screenshot: mss.screenshot.ScreenShot = sct.grab(region)  # ScreenShot object
+        np_screenshot = np.array(screenshot)
+        rgb_screenshot = cv2.cvtColor(np_screenshot, cv2.COLOR_BGR2RGB)
+        return rgb_screenshot
 
 def main_loop():
     board = Board(BOARD_SIZE)
@@ -74,7 +74,11 @@ def on_stop():
     # Perform any cleanup if necessary
 
 if __name__ == "__main__":
-    keyboard.add_hotkey(HOTKEY_START, on_start)
     keyboard.add_hotkey(HOTKEY_STOP, on_stop)
-    print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
-    keyboard.wait()
+    # FIXME hotkeys are not working if the game window is active, so we will just start the bot after 5 seconds
+    # keyboard.add_hotkey(HOTKEY_START, on_start)
+    # print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
+    # keyboard.wait()
+    print('Starting in 3 seconds...')
+    time.sleep(3)
+    on_start()
