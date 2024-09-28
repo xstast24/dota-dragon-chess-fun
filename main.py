@@ -24,7 +24,7 @@ from PIL import Image
 import keyboard
 import time
 from board import Board
-from move_detector import MoveDetector
+from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
 from colors import Color, ColorRange
 from config import *
@@ -44,7 +44,7 @@ def capture_board_screenshot() -> np.ndarray:
 
 def main_loop():
     board = Board(BOARD_SIZE)
-    move_detector = MoveDetector()
+    move_calculator = MoveCalculator()
     move_executor = MoveExecutor()
     sleep_time = SCREENSHOT_INTERVAL / 1000  # seconds
     print("Starting main loop...")
@@ -58,8 +58,9 @@ def main_loop():
         if DEBUG_MODE:
             print(board)
 
-        best_move = move_detector.find_best_move(board)
+        best_move = move_calculator.find_best_move(board)
         if best_move:
+            print(f"Executing move: {best_move}")
             move_executor.execute_move(best_move)
 
         time.sleep(sleep_time)
