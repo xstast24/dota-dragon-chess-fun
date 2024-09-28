@@ -52,7 +52,7 @@ def main_loop():
         screenshot = capture_board_screenshot()
         if DEBUG_MODE:
             print("Captured new screenshot, showing it...")
-            cv2.imshow('screenshot', np.array(screenshot))
+            cv2.imshow('screenshot', cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR))
             cv2.waitKey()
         board.update_from_screenshot(screenshot)
         if DEBUG_MODE:

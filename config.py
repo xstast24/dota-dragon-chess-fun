@@ -8,7 +8,7 @@ DEBUG_MODE = True  # if enabled, some debug info will be printed, some images di
 
 HOTKEY_START = 'f7'
 HOTKEY_STOP = 'f8'
-SCREENSHOT_INTERVAL = 100  # milliseconds
+SCREENSHOT_INTERVAL = 1000  # milliseconds
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
 BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
 
@@ -30,17 +30,17 @@ class GemColor(StrEnum):
     pink_special = 'pink_special'
 
 GemColorRanges = {
-    GemColor.red: ColorRange(Color(170, 60, 40), Color(195, 90, 60)),
+    GemColor.red: ColorRange(Color(170, 60, 40), Color(200, 90, 60)),
     GemColor.red_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
     GemColor.dark_red: ColorRange(Color(60, 20, 25), Color(80, 30, 35)),
     GemColor.dark_red_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
-    GemColor.blue: ColorRange(Color(70, 80, 150), Color(80, 95, 165)),
+    GemColor.blue: ColorRange(Color(70, 80, 150), Color(80, 95, 180)),
     GemColor.blue_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
     GemColor.turquoise: ColorRange(Color(60, 140, 150), Color(75, 160, 165)),
     GemColor.turquoise_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
     GemColor.yellow: ColorRange(Color(190, 145, 110), Color(215, 170, 120)),
     GemColor.yellow_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
-    GemColor.pink: ColorRange(Color(160, 85, 170), Color(180, 110, 190)),
+    GemColor.pink: ColorRange(Color(125, 65, 140), Color(185, 115, 195)),
     GemColor.pink_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0))
 }
 
