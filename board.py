@@ -7,7 +7,7 @@ import cv2
 class Board:
     def __init__(self, size: Tuple[int, int]):
         self.size: Tuple[int, int] = size
-        self.grid: np.ndarray = np.zeros(size, dtype=str)
+        self.grid: np.ndarray = np.empty(size, dtype=object)
 
     def update(self, new_state: np.ndarray) -> None:
         """Update the board with a new state."""
@@ -17,8 +17,7 @@ class Board:
 
     def update_from_screenshot(self, board_screenshot: np.ndarray) -> None:
         """Update the board from a screenshot of the board area."""
-        # count average color of each gem, but consider only inner area of each gem (exclude 20% of pixels from each side)
-        board_state = np.zeros(self.size, dtype=str)
+        board_state = np.empty(self.size, dtype=object)
         gem_width, gem_height = GEM_SIZE
         inner_margin = 0.2  # 20% margin from each side
 
@@ -38,22 +37,22 @@ class Board:
                 for gem_color in GemColor:
                     color_range = GemColorRanges[gem_color]
                     if color_range.contains(average_color_rgb):
-                        board_state[row, col] = gem_color.value
+                        board_state[row, col] = gem_color
                         break
                 else:
                     print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
-                    board_state[row, col] = ''
+                    board_state[row, col] = None
                     if DEBUG_MODE:
                         cv2.imshow('unknown', gem_area)
                         cv2.waitKey()
 
-            self.grid = board_state
+        self.grid = board_state
 
-    def get_gem(self, row: int, col: int) -> int:
+    def get_gem(self, row: int, col: int) -> GemColor:
         """Get the gem color at a specific position."""
         return self.grid[row, col]
 
-    def set_gem(self, row: int, col: int, color: int) -> None:
+    def set_gem(self, row: int, col: int, color: GemColor) -> None:
         """Set the gem color at a specific position."""
         self.grid[row, col] = color
 
@@ -72,4 +71,3 @@ class Board:
     def __str__(self) -> str:
         """String representation of the board."""
         return str(self.grid)
-
