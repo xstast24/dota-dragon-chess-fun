@@ -41,40 +41,6 @@ def capture_board_screenshot() -> np.ndarray:
         screenshot = sct.grab(region)  # ScreenShot object
         return np.array(screenshot)  # BGR order
 
-def parse_board_screenshot(screenshot) -> np.ndarray:
-    """Parse the screenshot to get the board state. Return a numpy array of the same size as the board, with each element being the color of the gem or empty string for unknown."""
-    # count average color of each gem, but consider only inner area of each gem (exclude 20% of pixels from each side)
-    board_state = np.zeros(BOARD_SIZE, dtype=str)
-    gem_width, gem_height = GEM_SIZE
-    inner_margin = 0.2  # 20% margin from each side
-
-    for row in range(BOARD_SIZE[0]):
-        for col in range(BOARD_SIZE[1]):
-            print(f'Row: {row}, Col: {col}')
-            x_start = int(col * gem_width + gem_width * inner_margin)
-            x_end = int((col + 1) * gem_width - gem_width * inner_margin)
-            y_start = int(row * gem_height + gem_height * inner_margin)
-            y_end = int((row + 1) * gem_height - gem_height * inner_margin)
-
-            gem_area = screenshot[y_start:y_end, x_start:x_end]
-            average_color = np.mean(gem_area, axis=(0, 1))  # BGR order
-            average_color_rgb = Color(*average_color[::-1])  # Convert BGR to RGB
-
-            # Match the average color to a GemColor
-            for gem_color in GemColor:
-                color_range = GemColorRanges[gem_color]
-                if color_range.contains(average_color_rgb):
-                    board_state[row, col] = gem_color.value
-                    break
-            else:
-                print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
-                board_state[row, col] = ''
-                # TODO debug helper - remove later
-                cv2.imshow('unknown', gem_area)
-                cv2.waitKey()
-
-    return board_state
-
 
 def main_loop():
     board = Board(BOARD_SIZE)
