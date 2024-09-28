@@ -3,6 +3,24 @@ from typing import Tuple, List
 from config import *
 import cv2
 
+class Gem:
+    def __init__(self, color: GemColor, position: Tuple[int, int]):
+        self.color: GemColor = color
+        self.position: Tuple[int, int] = position
+        self.x: int = position[0]
+        self.y: int = position[1]
+
+    def __str__(self) -> str:
+        return f'Gem({self.color}, {self.position})'
+
+    def __repr__(self) -> str:
+        return f'Gem({self.color}, {self.position})'
+
+    def __eq__(self, other: 'Gem') -> bool:
+        return self.color == other.color and self.position == other.position
+
+    def __hash__(self) -> int:
+        return hash((self.color, self.position))
 
 class Board:
     def __init__(self, size: Tuple[int, int]):
@@ -17,13 +35,13 @@ class Board:
 
     def update_from_screenshot(self, board_screenshot: np.ndarray) -> None:
         """Update the board from a screenshot of the board area."""
+        print(f'Updating board from screenshot...')
         board_state = np.empty(self.size, dtype=object)
         gem_width, gem_height = GEM_SIZE
         inner_margin = 0.2  # 20% margin from each side
 
         for row in range(BOARD_SIZE[0]):
             for col in range(BOARD_SIZE[1]):
-                print(f'Row: {row}, Col: {col}')
                 x_start = int(col * gem_width + gem_width * inner_margin)
                 x_end = int((col + 1) * gem_width - gem_width * inner_margin)
                 y_start = int(row * gem_height + gem_height * inner_margin)
@@ -37,7 +55,7 @@ class Board:
                 for gem_color in GemColor:
                     color_range = GemColorRanges[gem_color]
                     if color_range.contains(average_color_rgb):
-                        board_state[row, col] = gem_color
+                        board_state[row, col] = Gem(gem_color, (row, col))
                         break
                 else:
                     print(f"Warning: Unrecognized color {average_color_rgb} at position ({row}, {col})")
@@ -48,13 +66,13 @@ class Board:
 
         self.grid = board_state
 
-    def get_gem(self, row: int, col: int) -> GemColor:
-        """Get the gem color at a specific position."""
+    def get_gem(self, row: int, col: int) -> Gem:
+        """Get the gem at a specific position."""
         return self.grid[row, col]
 
     def set_gem(self, row: int, col: int, color: GemColor) -> None:
-        """Set the gem color at a specific position."""
-        self.grid[row, col] = color
+        """Set the gem at a specific position."""
+        self.grid[row, col] = Gem(color, (row, col))
 
     def is_valid_position(self, row: int, col: int) -> bool:
         """Check if a position is valid on the board."""
@@ -70,4 +88,13 @@ class Board:
 
     def __str__(self) -> str:
         """String representation of the board."""
-        return str(self.grid)
+        rows = []
+        for row in self.grid:
+            gems = []
+            for gem in row:
+                if gem:
+                    gems.append(f'{str(gem.color):8}')
+                else:
+                    gems.append('   None  ')
+            rows.append('\t'.join(gems))
+        return '\n'.join(rows)

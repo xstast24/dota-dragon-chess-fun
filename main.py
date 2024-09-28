@@ -55,6 +55,8 @@ def main_loop():
             cv2.imshow('screenshot', np.array(screenshot))
             cv2.waitKey()
         board.update_from_screenshot(screenshot)
+        if DEBUG_MODE:
+            print(board)
 
         best_move = move_detector.find_best_move(board)
         if best_move:
