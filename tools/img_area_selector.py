@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import cv2
 import numpy as np
@@ -17,10 +18,11 @@ class ImageAreaSelector:
         self.rmb_first_point = None
         self.selected_rectangle = None
 
-    def load_image(self, image_path: Optional[str]) -> np.ndarray:
+    def load_image(self, image_path: Optional[str]):
         if image_path:
             return cv2.imread(image_path)
-        return np.array(pyautogui.screenshot())
+        screenshot = pyautogui.screenshot()
+        return cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
     def take_new_screenshot(self) -> None:
         self.image = np.array(pyautogui.screenshot())
@@ -174,4 +176,5 @@ def main(image_path: Optional[str] = None) -> None:
 
 if __name__ == "__main__":
     image_path = sys.argv[1] if len(sys.argv) > 1 else None
+    image_path = Path(image_path).resolve()
     main(image_path)
