@@ -28,6 +28,8 @@ from move_executor import MoveExecutor
 from config import *
 
 
+run_condition = False  # used to turn the main loop on/off
+
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
     # debug help - load img from file - uncomment if needed
@@ -47,8 +49,10 @@ def main_loop():
     move_calculator = MoveCalculator()
     move_executor = MoveExecutor()
     sleep_time = SCREENSHOT_INTERVAL / 1000  # seconds
+
     print("Starting main loop...")
-    while True:
+    global run_condition
+    while run_condition:
         screenshot = capture_board_screenshot()
         if DEBUG_MODE:
             print("Captured new screenshot, showing it...")
@@ -66,19 +70,26 @@ def main_loop():
         time.sleep(sleep_time)
 
 def on_start():
-    print("Starting Dragon Chess bot...")
-    main_loop()
+    global run_condition
+    if not run_condition:
+        print("Starting the loop...")
+        run_condition = True
+        main_loop()
 
 def on_stop():
-    print("Stopping Dragon Chess bot...")
-    # Perform any cleanup if necessary
+    global run_condition
+    print("Stopping the loop...")
+    run_condition = False
+
+def hard_kill():
+    print("Killing the script...")
+    cv2.destroyAllWindows()
+    exit()
+
 
 if __name__ == "__main__":
+    keyboard.add_hotkey(HOTKEY_START, on_start)
     keyboard.add_hotkey(HOTKEY_STOP, on_stop)
-    # FIXME hotkeys are not working if the game window is active, so we will just start the bot after 5 seconds
-    # keyboard.add_hotkey(HOTKEY_START, on_start)
-    # print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
-    # keyboard.wait()
-    print('Starting in 3 seconds...')
-    time.sleep(3)
-    on_start()
+    keyboard.add_hotkey(HOTKEY_KILL, hard_kill)
+    print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
+    keyboard.wait(HOTKEY_EXIT)  # escape kills the program completely
