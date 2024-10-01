@@ -51,14 +51,14 @@ class BoardSimulator:
         self.orig_board = board
         self.board = deepcopy(board)
 
-    def simulate_move(self, board: Board, move: Move) -> None:
+    def simulate_move(self, move: Move) -> None:
         # Swap gems
         self.board.set_gem(*move.gem1.position, move.gem2.color)
         self.board.set_gem(*move.gem2.position, move.gem1.color)
 
         # Get new gems (after the swap)
-        gem1 = self.board.get_gem(move.gem1.position)
-        gem2 = self.board.get_gem(move.gem2.position)
+        gem1 = self.board.get_gem(*move.gem1.position)
+        gem2 = self.board.get_gem(*move.gem2.position)
 
         # TODO for simplicity, let's start with counting only the direct matches of the move, later use the repeating calculation below
         for gem in [gem1, gem2]:
@@ -141,7 +141,7 @@ class BoardSimulator:
 class MoveEvaluator:
     @staticmethod
     def evaluate_move(board: Board, move: Move) -> None:
-        BoardSimulator.simulate_move(board, move)
+        BoardSimulator(board=board).simulate_move(move)
 
 class MoveCalculator:
     def __init__(self):
