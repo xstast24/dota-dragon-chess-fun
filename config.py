@@ -10,7 +10,7 @@ HOTKEY_START = 'f7'  # start the main loop
 HOTKEY_STOP = 'f8'  # stop the main loop
 HOTKEY_EXIT = 'esc'  # quit the program (if the main loop is not running)
 HOTKEY_KILL = 'f9'  # Emergency button: hard-kill the program including debug windows etc
-SCREENSHOT_INTERVAL = 500  # milliseconds
+SCREENSHOT_INTERVAL = 1000  # milliseconds
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
 BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
 

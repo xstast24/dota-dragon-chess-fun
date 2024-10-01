@@ -29,11 +29,10 @@ from config import GemColor
 
 
 class Move:
-    sequences: dict[GemColor, int] = {}
-
     def __init__(self, gem1: Gem, gem2: Gem):
         self.gem1 = gem1
         self.gem2 = gem2
+        self.sequences = {}
 
     @cached_property
     def cleared_gems(self) -> int:
@@ -44,7 +43,7 @@ class Move:
         return max(self.sequences.values())
 
     def __str__(self):
-        return f"Move({self.gem1}, {self.gem2})"
+        return f"Move({self.gem1}, {self.gem2}, {self.sequences})"
 
 class BoardSimulator:
     def __init__(self, board: Board) -> None:
@@ -159,6 +158,9 @@ class MoveCalculator:
                 adjacent_positions = board.get_adjacent_positions(row, col)
                 for adj_row, adj_col in adjacent_positions:
                     adjacent_gem: Gem | None = board.get_gem(adj_row, adj_col)
+                    # FIXME use unknown gem instead of None, so it can be calculate dproperly in the simulator (with position etc.)
+                    if adjacent_gem is None:
+                        continue
                     move = Move(current_gem, adjacent_gem)
                     self.move_evaluator.evaluate_move(board, move)
                     moves.append(move)
