@@ -34,11 +34,11 @@ class Move:
         self.gem2 = gem2
         self.sequences = {}
 
-    @cached_property
+    @property
     def cleared_gems(self) -> int:
         return sum(self.sequences.values())
     
-    @cached_property
+    @property
     def longest_sequence(self) -> int:
         return max(self.sequences.values())
 
@@ -146,7 +146,6 @@ class MoveCalculator:
     def __init__(self):
         self.move_evaluator = MoveEvaluator()
 
-    @cache
     def calculate_all_valid_moves(self, board: Board) -> List[Move]:
         moves = []
         for row in range(board.size[0]):

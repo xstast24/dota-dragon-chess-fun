@@ -17,7 +17,8 @@ class MoveExecutor:
         x1, y1 = self._get_gem_center(move.gem1.position)
         x2, y2 = self._get_gem_center(move.gem2.position)
 
-        Mouse.drag(start_x=x1, start_y=y1, end_x=x2, end_y=y2, duration=0.1)
+        Mouse.drag(start_x=x1, start_y=y1, end_x=x2, end_y=y2, duration=0.2)
+        Mouse.move(x=100, y=100, duration=0.05)  # move mouse out of the screenshot
 
     def _get_gem_center(self, position: Tuple[int, int]) -> Tuple[int, int]:
         row, col = position

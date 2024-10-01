@@ -33,7 +33,7 @@ run_condition = False  # used to turn the main loop on/off
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
     # debug help - load img from file - uncomment if needed
-    # full_screenshot = cv2.imread('img/screenshot1080p.png')  # BGR order
+    # full_screenshot = cv2.imread('img/screen2.png')  # BGR order
     # full_screenshot = cv2.cvtColor(full_screenshot, cv2.COLOR_BGR2RGB)
     # return full_screenshot[BOARD_REGION[1]:BOARD_REGION[1]+BOARD_REGION[3], BOARD_REGION[0]:BOARD_REGION[0]+BOARD_REGION[2]]
 

@@ -10,7 +10,7 @@ HOTKEY_START = 'f7'  # start the main loop
 HOTKEY_STOP = 'f8'  # stop the main loop
 HOTKEY_EXIT = 'esc'  # quit the program (if the main loop is not running)
 HOTKEY_KILL = 'f9'  # Emergency button: hard-kill the program including debug windows etc
-SCREENSHOT_INTERVAL = 1000  # milliseconds
+SCREENSHOT_INTERVAL = 500  # milliseconds
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
 BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
 
@@ -38,7 +38,7 @@ GemColorRanges = {
     GemColor.dark_red_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
     GemColor.blue: ColorRange(Color(70, 80, 150), Color(80, 95, 180)),
     GemColor.blue_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
-    GemColor.turquoise: ColorRange(Color(60, 140, 150), Color(75, 160, 165)),
+    GemColor.turquoise: ColorRange(Color(60, 140, 145), Color(80, 160, 165)),
     GemColor.turquoise_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
     GemColor.yellow: ColorRange(Color(190, 145, 110), Color(215, 170, 120)),
     GemColor.yellow_special: ColorRange(Color(0, 0, 0), Color(0, 0, 0)),
