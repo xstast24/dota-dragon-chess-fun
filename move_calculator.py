@@ -29,7 +29,7 @@ from config import GemColor
 
 
 class Move:
-    sequences: Dict[GemColor, int] = {}
+    sequences: dict[GemColor, int] = {}
 
     def __init__(self, gem1: Gem, gem2: Gem):
         self.gem1 = gem1
