@@ -62,7 +62,7 @@ def main_loop():
         if DEBUG_MODE:
             print(board)
 
-        best_move = move_calculator.find_best_move(board)
+        best_move = move_calculator.find_longest_sequence_move(board)
         if best_move:
             print(f"Executing move: {best_move}")
             move_executor.execute_move(best_move)
