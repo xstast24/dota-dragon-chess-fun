@@ -43,6 +43,7 @@ class Move:
     def __str__(self):
         return f"Move({self.gem1}, {self.gem2}, {self.sequences})"
 
+
 class BoardSimulator:
     def __init__(self, board: Board) -> None:
         self.orig_board = board
@@ -135,10 +136,12 @@ class BoardSimulator:
             for row in range(empty_row, -1, -1):
                 board.grid[row, col] = None
 
+
 class MoveEvaluator:
     @staticmethod
     def evaluate_move(board: Board, move: Move) -> None:
         BoardSimulator(board=board).simulate_move(move)
+
 
 class MoveCalculator:
     def __init__(self):
