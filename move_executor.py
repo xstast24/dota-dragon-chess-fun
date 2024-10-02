@@ -1,9 +1,9 @@
-from config import BOARD_REGION, GEM_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT
-from mouse import Mouse
-from board import Gem
-from move_calculator import Move
-import time
 from typing import Tuple
+
+from config import BOARD_REGION, GEM_SIZE
+from mouse import Mouse
+from move_calculator import Move
+
 
 class MoveExecutor:
     def __init__(self):
