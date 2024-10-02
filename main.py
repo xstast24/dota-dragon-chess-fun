@@ -26,9 +26,11 @@ from board import Board
 from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
 from config import *
+from threading import Event
+import pyuac
 
 
-run_condition = False  # used to turn the main loop on/off
+run_condition = Event()  # used to turn the main loop on/off
 
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
@@ -52,7 +54,7 @@ def main_loop():
 
     print("Starting main loop...")
     global run_condition
-    while run_condition:
+    while run_condition.is_set():
         screenshot = capture_board_screenshot()
         if DEBUG_MODE:
             print("Captured new screenshot, showing it...")
@@ -71,23 +73,29 @@ def main_loop():
 
 def on_start():
     global run_condition
-    if not run_condition:
+    if not run_condition.is_set():
         print("Starting the loop...")
-        run_condition = True
+        run_condition.set()
         main_loop()
 
 def on_stop():
-    global run_condition
     print("Stopping the loop...")
-    run_condition = False
+    global run_condition
+    run_condition.clear()
 
 def hard_kill():
     print("Killing the script...")
+    run_condition.clear()
     cv2.destroyAllWindows()
     exit()
 
 
 if __name__ == "__main__":
+    # if not pyuac.isUserAdmin():
+    #     print("Re-launching as admin")
+    #     pyuac.runAsAdmin()
+    # else:        
+    #     print('Running as admin')  # Already an admin here.
     keyboard.add_hotkey(HOTKEY_START, on_start)
     keyboard.add_hotkey(HOTKEY_STOP, on_stop)
     keyboard.add_hotkey(HOTKEY_KILL, hard_kill)
