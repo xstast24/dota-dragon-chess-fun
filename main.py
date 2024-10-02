@@ -15,22 +15,23 @@
 # 6. A way to allow the player to make a move (swap two neighboring gems) by simulating the mouse move - we need a way of mouse simulating that works in Dota 2
 # 7. A method that runs the screenshot capture, parsing, move detection, and move execution in time intervals of T milliseconds
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
-from enum import StrEnum
-import mss
+
+import time
+from threading import Event
+
 import cv2
+import keyboard
+import mss
 import mss.screenshot
 import numpy as np
-import keyboard
-import time
+
 from board import Board
+from config import *
 from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
-from config import *
-from threading import Event
-import pyuac
-
 
 run_condition = Event()  # used to turn the main loop on/off
+
 
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
@@ -45,6 +46,7 @@ def capture_board_screenshot() -> np.ndarray:
         np_screenshot = np.array(screenshot)
         rgb_screenshot = cv2.cvtColor(np_screenshot, cv2.COLOR_BGR2RGB)
         return rgb_screenshot
+
 
 def main_loop():
     board = Board(BOARD_SIZE)
@@ -71,6 +73,7 @@ def main_loop():
 
         time.sleep(sleep_time)
 
+
 def on_start():
     global run_condition
     if not run_condition.is_set():
@@ -78,10 +81,12 @@ def on_start():
         run_condition.set()
         main_loop()
 
+
 def on_stop():
     print("Stopping the loop...")
     global run_condition
     run_condition.clear()
+
 
 def hard_kill():
     print("Killing the script...")
