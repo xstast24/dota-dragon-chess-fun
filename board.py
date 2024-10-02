@@ -1,7 +1,10 @@
-import numpy as np
 from typing import Tuple, List
-from config import *
+
 import cv2
+import numpy as np
+
+from config import *
+
 
 class Gem:
     def __init__(self, color: GemColor, position: Tuple[int, int]):
@@ -21,6 +24,7 @@ class Gem:
 
     def __hash__(self) -> int:
         return hash((self.color, self.position))
+
 
 class Board:
     def __init__(self, size: Tuple[int, int]):
@@ -87,8 +91,8 @@ class Board:
     def get_adjacent_positions(self, row: int, col: int) -> List[Tuple[int, int]]:
         """Get valid adjacent positions for a given position."""
         adjacent = [
-            (row-1, col), (row+1, col),
-            (row, col-1), (row, col+1)
+            (row - 1, col), (row + 1, col),
+            (row, col - 1), (row, col + 1)
         ]
         return [(r, c) for r, c in adjacent if self.is_valid_position(r, c)]
 

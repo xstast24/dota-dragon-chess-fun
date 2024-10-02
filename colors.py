@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from random import randint
-from typing import Tuple, Optional
+from typing import Tuple
 
 
 class Color:
@@ -44,10 +44,10 @@ class Color:
 
     def __str__(self) -> str:
         return f"Color(r={self.red}, g={self.green}, b={self.blue})"
-    
+
     def __hash__(self) -> int:
         return hash(self.__str__())
-    
+
     def __eq__(self, other: Color) -> bool:
         return self.red == other.red and self.green == other.green and self.blue == other.blue
 
@@ -69,9 +69,9 @@ class ColorRange:
 
     def __str__(self) -> str:
         return f"ColorRange(min_rgb={self.min_rgb}, max_rgb={self.max_rgb})"
-    
+
     def __hash__(self) -> int:
         return hash(self.__str__())
-    
+
     def __eq__(self, other: ColorRange) -> bool:
         return self.min_rgb == other.min_rgb and self.max_rgb == other.max_rgb

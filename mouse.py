@@ -1,5 +1,6 @@
-import pyautogui
 import time
+
+import pyautogui
 import win32api
 import win32con
 
@@ -9,7 +10,6 @@ class Mouse:
     def move(x: int, y: int, duration: float = 0.2):
         """
         Move the cursor to the specified coordinates.
-        
         :param x: X-coordinate on the screen
         :param y: Y-coordinate on the screen
         :param duration: Time taken to move the cursor (in seconds)
@@ -20,7 +20,6 @@ class Mouse:
     def click(x: int, y: int, duration: float = 0.1):
         """
         Perform a click at the specified coordinates.
-        
         :param x: X-coordinate on the screen
         :param y: Y-coordinate on the screen
         :param duration: Time taken to click (in seconds)
@@ -33,7 +32,6 @@ class Mouse:
     def move_and_click(x: int, y: int, move_duration: float = 0.2, click_duration: float = 0.1):
         """
         Move the cursor to the specified coordinates and perform a click.
-        
         :param x: X-coordinate on the screen
         :param y: Y-coordinate on the screen
         :param move_duration: Time taken to move the cursor (in seconds)
@@ -48,7 +46,6 @@ class Mouse:
     def drag(start_x: int, start_y: int, end_x: int, end_y: int, duration: float = 0.2):
         """
         Simulate a mouse drag from the start point to the end point.
-        
         :param start_x: Starting X-coordinate
         :param start_y: Starting Y-coordinate
         :param end_x: Ending X-coordinate
@@ -58,14 +55,14 @@ class Mouse:
         pyautogui.moveTo(start_x, start_y)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, start_x, start_y, 0, 0)
         time.sleep(0.1)
-        
+
         steps = 20
         for i in range(1, steps + 1):
             x = start_x + (end_x - start_x) * i // steps
             y = start_y + (end_y - start_y) * i // steps
             win32api.SetCursorPos((x, y))
             time.sleep(duration / steps)
-        
+
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, end_x, end_y, 0, 0)
 
 
