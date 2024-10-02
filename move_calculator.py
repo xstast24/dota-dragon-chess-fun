@@ -177,6 +177,8 @@ class MoveCalculator:
 
         return longest
 
+    def find_longest_with_color_order(self, board: Board) -> Optional[Move]:
+        pass  # TODO implement
 
     def find_best_move(self, board: Board) -> Optional[Move]:
         raise NotImplementedError()  # TODO
