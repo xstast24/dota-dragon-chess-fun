@@ -19,12 +19,10 @@ This design allows for easy extension and modification of the scoring system
 and move evaluation logic.
 """
 
-from ast import Dict
-from functools import cache, cached_property
-from typing import List, Optional, Set, Tuple
-from board import Board, Gem
 from copy import deepcopy
+from typing import List, Optional, Tuple, Iterable
 
+from board import Board, Gem
 from config import GemColor
 
 
@@ -32,12 +30,12 @@ class Move:
     def __init__(self, gem1: Gem, gem2: Gem):
         self.gem1 = gem1
         self.gem2 = gem2
-        self.sequences = {}
+        self.sequences: dict[GemColor, int] = {}
 
     @property
     def cleared_gems(self) -> int:
         return sum(self.sequences.values())
-    
+
     @property
     def longest_sequence(self) -> int:
         return max(self.sequences.values())
@@ -77,8 +75,8 @@ class BoardSimulator:
 
     def get_valid_matches(self, gem: Gem) -> List[Gem]:
         """Get matching gems connected to this gem, including this gem. Only if there is a valid match of 3 or more gems, otherwise empty list."""
-        horizontal = self.check_directional_matches(gem, direction=[0, 1])
-        vertical = self.check_directional_matches(gem, direction=[1, 0])
+        horizontal = self.check_directional_matches(gem, direction=(0, 1))
+        vertical = self.check_directional_matches(gem, direction=(1, 0))
         if len(horizontal) >= 3 and len(vertical) >= 3:
             return list(set(horizontal + vertical))
         elif len(horizontal) >= 3:
@@ -146,6 +144,17 @@ class MoveCalculator:
     def __init__(self):
         self.move_evaluator = MoveEvaluator()
 
+    @staticmethod
+    def _get_longest_from(moves: List[Move]) -> Optional[Move]:
+        longest = None
+        if len(moves) >= 1:
+            longest = moves[0]
+        for move in moves:
+            if move.longest_sequence > longest.longest_sequence:
+                longest = move
+
+        return longest
+
     def calculate_all_valid_moves(self, board: Board) -> List[Move]:
         moves = []
         for row in range(board.size[0]):
@@ -166,19 +175,39 @@ class MoveCalculator:
 
         return moves
 
+    def get_all_moves_grouped_by_color(self, board: Board) -> dict[GemColor, list[Move]]:
+        all_moves = self.calculate_all_valid_moves(board)
+        moves = {}
+        for move in all_moves:
+            for color in move.sequences.keys():
+                try:
+                    moves[color].append(move)
+                except KeyError:
+                    moves[color] = [move]
+        return moves
+
     def find_longest_sequence_move(self, board: Board) -> Optional[Move]:
         moves = self.calculate_all_valid_moves(board)
-        longest = None
-        if len(moves) >= 1:
-            longest = moves[0]
-        for move in moves:
-            if move.longest_sequence > longest.longest_sequence:
-                longest = move
+        return self._get_longest_from(moves)
 
-        return longest
+    def get_move_by_color_ordering(self, board: Board, colors: Iterable[GemColor] = tuple(c for c in GemColor)) -> Optional[Move]:
+        """
+        Get moves of color 1, if not available, then of color 2, etc. The selected move is the longest available in the first available color.
+        Note: There can be longer moves available in other colors, but we ignore them. We want to first deplete one color, then another, etc.
+        """
+        all_moves = self.get_all_moves_grouped_by_color(board)
+        moves = []
+        for color in colors:
+            try:
+                moves = all_moves[color]
+                break
+            except KeyError:
+                continue
+
+        return self._get_longest_from(moves)
 
     def find_longest_with_color_order(self, board: Board) -> Optional[Move]:
-        pass  # TODO implement
+        pass  # TODO rename and implement - should get the longest available, but if multiple colors have the same length, then prioritize by color
 
     def find_best_move(self, board: Board) -> Optional[Move]:
         raise NotImplementedError()  # TODO

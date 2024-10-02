@@ -1,8 +1,8 @@
-import pyautogui
 from enum import StrEnum
 
-from colors import Color, ColorRange
+import pyautogui
 
+from colors import Color, ColorRange
 
 DEBUG_MODE = False  # if enabled, some debug info will be printed, some images displayed (e.g. if a screenshot is captured), etc.
 
@@ -17,6 +17,7 @@ BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
 GEM_SIZE = (BOARD_REGION[2] // BOARD_SIZE[0], BOARD_REGION[3] // BOARD_SIZE[1])  # width, height
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
 
+
 class GemColor(StrEnum):
     red = 'red'
     red_special = 'red_special'
@@ -30,6 +31,7 @@ class GemColor(StrEnum):
     yellow_special = 'yellow_special'
     pink = 'pink'
     pink_special = 'pink_special'
+
 
 GemColorRanges = {
     GemColor.red: ColorRange(Color(170, 60, 40), Color(200, 90, 60)),
