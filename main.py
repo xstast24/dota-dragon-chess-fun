@@ -15,23 +15,21 @@
 # 6. A way to allow the player to make a move (swap two neighboring gems) by simulating the mouse move - we need a way of mouse simulating that works in Dota 2
 # 7. A method that runs the screenshot capture, parsing, move detection, and move execution in time intervals of T milliseconds
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
-
-import time
-from threading import Event
-
-import cv2
-import keyboard
+from enum import StrEnum
 import mss
+import cv2
 import mss.screenshot
 import numpy as np
-
+import time
 from board import Board
-from config import *
 from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
+from config import *
+from threading import Event
+from hotkeys import add_hotkey, start_listening
+
 
 run_condition = Event()  # used to turn the main loop on/off
-
 
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
@@ -47,7 +45,6 @@ def capture_board_screenshot() -> np.ndarray:
         rgb_screenshot = cv2.cvtColor(np_screenshot, cv2.COLOR_BGR2RGB)
         return rgb_screenshot
 
-
 def main_loop():
     board = Board(BOARD_SIZE)
     move_calculator = MoveCalculator()
@@ -57,6 +54,9 @@ def main_loop():
     print("Starting main loop...")
     global run_condition
     while run_condition.is_set():
+        print('loop')
+        time.sleep(sleep_time)
+        continue
         screenshot = capture_board_screenshot()
         if DEBUG_MODE:
             print("Captured new screenshot, showing it...")
@@ -73,7 +73,6 @@ def main_loop():
 
         time.sleep(sleep_time)
 
-
 def on_start():
     global run_condition
     if not run_condition.is_set():
@@ -81,12 +80,10 @@ def on_start():
         run_condition.set()
         main_loop()
 
-
 def on_stop():
     print("Stopping the loop...")
     global run_condition
     run_condition.clear()
-
 
 def hard_kill():
     print("Killing the script...")
@@ -96,13 +93,8 @@ def hard_kill():
 
 
 if __name__ == "__main__":
-    # if not pyuac.isUserAdmin():
-    #     print("Re-launching as admin")
-    #     pyuac.runAsAdmin()
-    # else:        
-    #     print('Running as admin')  # Already an admin here.
-    keyboard.add_hotkey(HOTKEY_START, on_start)
-    keyboard.add_hotkey(HOTKEY_STOP, on_stop)
-    keyboard.add_hotkey(HOTKEY_KILL, hard_kill)
+    add_hotkey(HOTKEY_START, on_start)
+    add_hotkey(HOTKEY_STOP, on_stop)
+    add_hotkey(HOTKEY_KILL, hard_kill)
     print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
-    keyboard.wait(HOTKEY_EXIT)  # escape kills the program completely
+    start_listening()
