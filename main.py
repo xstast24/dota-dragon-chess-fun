@@ -15,6 +15,7 @@
 # 6. A way to allow the player to make a move (swap two neighboring gems) by simulating the mouse move - we need a way of mouse simulating that works in Dota 2
 # 7. A method that runs the screenshot capture, parsing, move detection, and move execution in time intervals of T milliseconds
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
+from contextlib import suppress
 from enum import StrEnum
 import mss
 import cv2
@@ -26,10 +27,12 @@ from move_calculator import MoveCalculator
 from move_executor import MoveExecutor
 from config import *
 from threading import Event
-from hotkeys import add_hotkey, start_listening
+from hotkeys import add_hotkey, start_listening, stop_listening
 
 
-run_condition = Event()  # used to turn the main loop on/off
+run_condition = Event()  # used to start/stop the game execution loop
+exit_condition = Event()  # used to exit the whole program completely
+
 
 def capture_board_screenshot() -> np.ndarray:
     """Return a screenshot of the board as a numpy array, colors in RGB order (can be indexed like: pixel = array[height][width])"""
@@ -52,11 +55,7 @@ def main_loop():
     sleep_time = SCREENSHOT_INTERVAL / 1000  # seconds
 
     print("Starting main loop...")
-    global run_condition
     while run_condition.is_set():
-        print('loop')
-        time.sleep(sleep_time)
-        continue
         screenshot = capture_board_screenshot()
         if DEBUG_MODE:
             print("Captured new screenshot, showing it...")
@@ -73,28 +72,38 @@ def main_loop():
 
         time.sleep(sleep_time)
 
-def on_start():
-    global run_condition
+def start():
     if not run_condition.is_set():
-        print("Starting the loop...")
+        print("Starting...")
         run_condition.set()
         main_loop()
+    else:
+        print("Already running")
 
-def on_stop():
-    print("Stopping the loop...")
-    global run_condition
+def stop():
+    print("Stopping...")
     run_condition.clear()
 
-def hard_kill():
-    print("Killing the script...")
+def exit():
+    print("Exiting the program")
     run_condition.clear()
-    cv2.destroyAllWindows()
-    exit()
+    with suppress(Exception):
+        cv2.destroyAllWindows()
+    exit_condition.set()
 
 
 if __name__ == "__main__":
-    add_hotkey(HOTKEY_START, on_start)
-    add_hotkey(HOTKEY_STOP, on_stop)
-    add_hotkey(HOTKEY_KILL, hard_kill)
+    add_hotkey(HOTKEY_START, start)
+    add_hotkey(HOTKEY_STOP, stop)
+    add_hotkey(HOTKEY_KILL, exit)
     print(f"Press {HOTKEY_START} to start the bot, {HOTKEY_STOP} to stop.")
+    print(f"Press {HOTKEY_KILL} to exit the program.")
     start_listening()
+    try:
+        while not exit_condition.is_set():
+            time.sleep(0.2)  # Small sleep to prevent high CPU usage
+    except KeyboardInterrupt:
+        print("Keyboard interrupt received. Exiting...")
+    finally:
+        stop_listening()
+        print("Program terminated")
