@@ -108,3 +108,8 @@ class Board:
                     gems.append('   None  ')
             rows.append('\t'.join(gems))
         return '\n'.join(rows)
+    
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Board):
+            return False
+        return np.array_equal(self.grid, other.grid)
