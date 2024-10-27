@@ -17,6 +17,7 @@
 # 8. Hotkey to start and stop the main method (that captures the screenshot, parses it, detects the moves, and makes the move), so user can run/stop the script as needed
 from contextlib import suppress
 from enum import StrEnum
+import random
 import mss
 import cv2
 import mss.screenshot
@@ -53,6 +54,8 @@ def main_loop():
     move_calculator = MoveCalculator()
     move_executor = MoveExecutor()
     sleep_time = SCREENSHOT_INTERVAL / 1000  # seconds
+    repetition_count = 0  # how many times the board has not changed (best move is probably not working)
+    previous_board_grid = board.grid  # empty grid
 
     print("Starting main loop...")
     while run_condition.is_set():
@@ -61,14 +64,29 @@ def main_loop():
             print("Captured new screenshot, showing it...")
             cv2.imshow('screenshot', cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR))
             cv2.waitKey()
+
         board.update_from_screenshot(screenshot)
         if DEBUG_MODE:
             print(board)
 
-        best_move = move_calculator.find_longest_sequence_move(board)
+        # check for repetitions to avoid being stuck in an endless loop if the best move is invalid and does nothing (can't be played)
+        if np.array_equal(board.grid, previous_board_grid):
+            repetition_count += 1
+        else:
+            repetition_count = 0
+        previous_board_grid = board.grid
+        if repetition_count >= MAX_REPETITION_COUNT:
+            print("Repetition detected. Trying to find a different move...")
+            all_moves = move_calculator.calculate_all_valid_moves(board)
+            best_move = random.choice(all_moves) if all_moves else None
+        else:
+            best_move = move_calculator.find_best_move(board)
+
         if best_move:
             print(f"Executing move: {best_move}")
             move_executor.execute_move(best_move)
+        else:
+            print("No valid moves found. Skipping this turn...")
 
         time.sleep(sleep_time)
 

@@ -10,9 +10,10 @@ HOTKEY_START = 'f7'  # start the main loop
 HOTKEY_STOP = 'f8'  # stop the main loop
 HOTKEY_EXIT = 'esc'  # quit the program (if the main loop is not running)
 HOTKEY_KILL = 'f9'  # Emergency button: hard-kill the program including debug windows etc
-SCREENSHOT_INTERVAL = 500  # milliseconds
+SCREENSHOT_INTERVAL = 200  # [milliseconds] this is length of a pause after each move/screenshot (to not spam short sequences without pieces not fallen down)
 BOARD_REGION = (220, 130, 720, 720)  # (left, top, width, height)
 BOARD_SIZE = (8, 8)  # number of columns and rows (width, height)
+MAX_REPETITION_COUNT = 3  # if nothing is changed in the board for this many consecutive screenshots/moves, try to play another move (not the best one) to avoid being stuck
 
 GEM_SIZE = (BOARD_REGION[2] // BOARD_SIZE[0], BOARD_REGION[3] // BOARD_SIZE[1])  # width, height
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
