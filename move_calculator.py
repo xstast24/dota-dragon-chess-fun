@@ -209,8 +209,31 @@ class MoveCalculator:
 
         return self._get_longest_from(moves)
 
-    def find_longest_with_color_order(self, board: Board) -> Optional[Move]:
-        pass  # TODO rename and implement - should get the longest available, but if multiple colors have the same length, then prioritize by color
+    def find_longest_with_color_order(self, board: Board, colors: Iterable[GemColor] = tuple(c for c in GemColor)) -> Optional[Move]:
+        """
+        Find the longest move. If there are multiple longest moves, return the move determined by the colors order.
+        E.g. longest moves are [blue=5, green=5, red=4] and color order is [red, green, blue], then return green=5.
+        """
+        all_moves = self.get_all_moves_grouped_by_color(board)
+        moves = {}  # key is length, value is list of moves ordered by color (if any available for the given length)
+        for color in colors:
+            try:
+                current_color_moves = all_moves[color]
+                if not current_color_moves:
+                    continue  # no moves for this color
+            except KeyError:
+                continue  # no moves for this color
+
+            longest = self._get_longest_from(current_color_moves)
+            try:
+                moves[longest.longest_sequence].append(longest)
+            except KeyError:
+                moves[longest.longest_sequence] = [longest]
+
+        if not moves:
+            return None
+        return moves[max(moves.keys())][0]
+
 
     def find_best_move(self, board: Board) -> Optional[Move]:
-        raise NotImplementedError()  # TODO
+        return self.find_longest_with_color_order(board)  # currently the best available heuristic
